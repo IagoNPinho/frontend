@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { name: "Configurações", href: "/dashboard/settings", icon: Settings },
+  { name: "Configuracoes", href: "/dashboard/settings", icon: Settings },
 ]
 
 export function AppSidebar() {
@@ -16,13 +16,12 @@ export function AppSidebar() {
   const router = useRouter()
 
   const handleLogout = () => {
-    // Pronto para conectar com API REST
+    window.localStorage.removeItem("auth_token")
     router.push("/login")
   }
 
   return (
     <aside className="flex flex-col w-64 h-screen bg-sidebar border-r border-sidebar-border">
-      {/* Logo */}
       <div className="flex items-center gap-3 px-6 py-5 border-b border-sidebar-border">
         <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-accent">
           <MessageSquare className="w-4 h-4 text-accent-foreground" />
@@ -30,12 +29,11 @@ export function AppSidebar() {
         <span className="text-lg font-semibold text-sidebar-foreground">Holy AI</span>
       </div>
 
-      {/* Navigation */}
       <nav className="flex-1 px-3 py-4 space-y-1">
         {navigation.map((item) => {
-          const isActive = pathname === item.href || 
+          const isActive = pathname === item.href ||
             (item.href !== "/dashboard" && pathname.startsWith(item.href))
-          
+
           return (
             <Link
               key={item.name}
@@ -54,7 +52,6 @@ export function AppSidebar() {
         })}
       </nav>
 
-      {/* Logout */}
       <div className="px-3 py-4 border-t border-sidebar-border">
         <Button
           variant="ghost"

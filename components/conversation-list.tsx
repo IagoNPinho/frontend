@@ -8,6 +8,7 @@ import { Search } from "lucide-react"
 export interface Conversation {
   id: string
   contactName: string
+  contactId?: string
   lastMessage: string
   timestamp: string
   unread?: boolean

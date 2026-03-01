@@ -7,22 +7,32 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { MessageSquare } from "lucide-react"
+import { request } from "@/lib/api"
 
 export default function LoginPage() {
   const router = useRouter()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
-    
-    // Simulação de login - pronto para conectar com API REST
-    setTimeout(() => {
-      setIsLoading(false)
+    setError(null)
+
+    try {
+      const res = await request<{ token: string }>("/auth/login", {
+        method: "POST",
+        body: JSON.stringify({ email, password }),
+      })
+      window.localStorage.setItem("auth_token", res.token)
       router.push("/dashboard")
-    }, 1000)
+    } catch (err) {
+      setError("Credenciais invalidas.")
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -67,6 +77,9 @@ export default function LoginPage() {
                 className="bg-input border-border text-foreground placeholder:text-muted-foreground"
               />
             </div>
+            {error && (
+              <div className="text-sm text-destructive">{error}</div>
+            )}
             <Button 
               type="submit" 
               className="w-full bg-primary text-primary-foreground hover:bg-primary/90"

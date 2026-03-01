@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -8,72 +8,87 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Save, Building2, MessageSquare, Clock, CheckCircle } from "lucide-react"
+import { request } from "@/lib/api"
 
 export default function SettingsPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [saved, setSaved] = useState(false)
-  
-  // Estado do formulário - pronto para conectar com API REST
+
   const [settings, setSettings] = useState({
-    clinicName: "Clínica Exemplo",
+    clinicName: "",
     voiceTone: "professional",
-    procedures: "Consultas\nAvaliações\nTratamentos\nRetornos",
-    workingHours: "Segunda a Sexta: 08:00 - 18:00\nSábado: 08:00 - 12:00",
-    confirmationMessage: "Olá! Sua consulta está confirmada para {data} às {horario}. Lembre-se de trazer seus documentos. Até breve!",
+    procedures: "",
+    workingHours: "",
+    confirmationMessage: "",
   })
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const res = await request<{ clinicSettings: typeof settings }>("/settings")
+        setSettings(res.clinicSettings)
+      } catch (err) {
+        console.error(err)
+      }
+    }
+    load()
+  }, [])
 
   const handleSave = async () => {
     setIsLoading(true)
     setSaved(false)
-    
-    // Simulação de salvamento - pronto para conectar com API REST
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    
-    setIsLoading(false)
-    setSaved(true)
-    setTimeout(() => setSaved(false), 3000)
+
+    try {
+      await request("/clinic-settings", {
+        method: "PUT",
+        body: JSON.stringify(settings),
+      })
+      setSaved(true)
+      setTimeout(() => setSaved(false), 3000)
+    } catch (err) {
+      console.error(err)
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
     <div className="h-full overflow-y-auto">
       <div className="max-w-3xl mx-auto p-6 space-y-6">
-        {/* Header */}
         <div>
-          <h1 className="text-2xl font-semibold text-foreground">Configurações</h1>
+          <h1 className="text-2xl font-semibold text-foreground">Configuracoes</h1>
           <p className="text-muted-foreground mt-1">
-            Configure as informações da sua clínica e personalize o atendimento da IA.
+            Configure as informacoes da sua clinica e personalize o atendimento da IA.
           </p>
         </div>
 
-        {/* Informações da Clínica */}
         <Card className="border-border bg-card">
           <CardHeader>
             <div className="flex items-center gap-2">
               <Building2 className="w-5 h-5 text-muted-foreground" />
-              <CardTitle className="text-foreground">Informações da Clínica</CardTitle>
+              <CardTitle className="text-foreground">Informacoes da Clinica</CardTitle>
             </div>
-            <CardDescription>Dados básicos sobre sua clínica</CardDescription>
+            <CardDescription>Dados basicos sobre sua clinica</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="clinicName" className="text-foreground">Nome da Clínica</Label>
+              <Label htmlFor="clinicName" className="text-foreground">Nome da Clinica</Label>
               <Input
                 id="clinicName"
                 value={settings.clinicName}
                 onChange={(e) => setSettings(prev => ({ ...prev, clinicName: e.target.value }))}
-                placeholder="Nome da sua clínica"
+                placeholder="Nome da sua clinica"
                 className="bg-input border-border text-foreground placeholder:text-muted-foreground"
               />
             </div>
           </CardContent>
         </Card>
 
-        {/* Tom de Voz */}
         <Card className="border-border bg-card">
           <CardHeader>
             <div className="flex items-center gap-2">
               <MessageSquare className="w-5 h-5 text-muted-foreground" />
-              <CardTitle className="text-foreground">Personalização da IA</CardTitle>
+              <CardTitle className="text-foreground">Personalizacao da IA</CardTitle>
             </div>
             <CardDescription>Configure como a IA deve se comunicar</CardDescription>
           </CardHeader>
@@ -89,7 +104,7 @@ export default function SettingsPage() {
                 </SelectTrigger>
                 <SelectContent className="bg-popover border-border">
                   <SelectItem value="professional">Profissional</SelectItem>
-                  <SelectItem value="friendly">Amigável</SelectItem>
+                  <SelectItem value="friendly">Amigavel</SelectItem>
                   <SelectItem value="formal">Formal</SelectItem>
                   <SelectItem value="casual">Casual</SelectItem>
                 </SelectContent>
@@ -113,18 +128,17 @@ export default function SettingsPage() {
           </CardContent>
         </Card>
 
-        {/* Horários */}
         <Card className="border-border bg-card">
           <CardHeader>
             <div className="flex items-center gap-2">
               <Clock className="w-5 h-5 text-muted-foreground" />
-              <CardTitle className="text-foreground">Horários e Mensagens</CardTitle>
+              <CardTitle className="text-foreground">Horarios e Mensagens</CardTitle>
             </div>
-            <CardDescription>Configure horários e mensagens automáticas</CardDescription>
+            <CardDescription>Configure horarios e mensagens automaticas</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="workingHours" className="text-foreground">Horário de Atendimento</Label>
+              <Label htmlFor="workingHours" className="text-foreground">Horario de Atendimento</Label>
               <Textarea
                 id="workingHours"
                 value={settings.workingHours}
@@ -136,7 +150,7 @@ export default function SettingsPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="confirmationMessage" className="text-foreground">Mensagem de Confirmação</Label>
+              <Label htmlFor="confirmationMessage" className="text-foreground">Mensagem de Confirmacao</Label>
               <Textarea
                 id="confirmationMessage"
                 value={settings.confirmationMessage}
@@ -146,18 +160,17 @@ export default function SettingsPage() {
                 className="bg-input border-border text-foreground placeholder:text-muted-foreground resize-none"
               />
               <p className="text-xs text-muted-foreground">
-                {'Use {data} e {horario} para inserir dinamicamente a data e horário da consulta.'}
+                {'Use {data} e {horario} para inserir dinamicamente a data e horario da consulta.'}
               </p>
             </div>
           </CardContent>
         </Card>
 
-        {/* Botão Salvar */}
         <div className="flex items-center justify-end gap-3 pt-4">
           {saved && (
             <span className="flex items-center gap-1.5 text-sm text-success">
               <CheckCircle className="w-4 h-4" />
-              Configurações salvas com sucesso!
+              Configuracoes salvas com sucesso!
             </span>
           )}
           <Button 
@@ -166,7 +179,7 @@ export default function SettingsPage() {
             className="bg-primary text-primary-foreground hover:bg-primary/90"
           >
             <Save className="w-4 h-4 mr-2" />
-            {isLoading ? "Salvando..." : "Salvar Configurações"}
+            {isLoading ? "Salvando..." : "Salvar Configuracoes"}
           </Button>
         </div>
       </div>
